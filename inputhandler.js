@@ -92,7 +92,7 @@ window.addEventListener('DOMContentLoaded', () => { scrollhandler() });
                 isAnimating = true;
                 atFooter = false;
                 accumulatedDeltaFooter = 0;
-                animateScrollToTarget(200);
+                animateScrollToTarget(1000);
                 fixedContent.style.top = `${topMargin}px`;
             }
         }
@@ -121,22 +121,54 @@ window.addEventListener('DOMContentLoaded', () => { scrollhandler() });
 
         function animateToFooter() {
             let topPosition = footer.getBoundingClientRect().top + window.scrollY - initHeaderHeight;
-            window.scrollTo({ top: topPosition, behavior: 'smooth' });
-            fixedContent.style.top = topMargin - footerHeight + "px";
+            const start = window.pageYOffset;
+            const change = topPosition - start;
+            let currentTime = 0;
+            const increment = 15;
+            
+            function animate() {
+                currentTime += increment;
+                const val = Math.easeInOutQuad(currentTime, start, change, 1000);
+                window.scrollTo(0, val);
+                if (currentTime < 1000) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isAnimating = false;
+                }
+            }
 
-            setTimeout(() => {
-                isAnimating = false;
-            }, 100);
+            animate();
+            fixedContent.style.top = topMargin - footerHeight + "px";
         }
 
         function animateScrollToTarget(timeout) {
             scrollTarget = contentAreas[currentTargetIndex];
             const topPosition = scrollTarget.getBoundingClientRect().top + window.scrollY - initHeaderHeight;
-            window.scrollTo({ top: topPosition, behavior: 'smooth' });
-            setTimeout(() => {
+            const start = window.pageYOffset;
+            const change = topPosition - start;
+            let currentTime = 0;
+            const increment = 15;
+
+            function animate() {
+            currentTime += increment;
+            const val = Math.easeInOutQuad(currentTime, start, change, timeout);
+            window.scrollTo(0, val);
+            if (currentTime < timeout) {
+                requestAnimationFrame(animate);
+            } else {
                 isAnimating = false;
-            }, timeout);
+            }
+            }
+
+            animate();
         }
+
+        Math.easeInOutQuad = function (t, b, c, d) {
+            t /= d / 2;
+            if (t < 1) return c / 2 * t * t + b;
+            t--;
+            return -c / 2 * (t * (t - 2) - 1) + b;
+        };
 
         function setScrollTargetFromHash(hash) {
             for (const contentArea of contentAreas) {
