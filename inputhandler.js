@@ -1,5 +1,7 @@
 window.addEventListener('DOMContentLoaded', () => {
-    initScrollhandler();
+    setTimeout(() => {
+        initScrollhandler();
+    }, 500);
 });
 
 window.addEventListener('resize', () => {
