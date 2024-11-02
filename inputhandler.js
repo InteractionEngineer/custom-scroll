@@ -124,7 +124,6 @@ function scrollhandler() {
         const atTop = scrollTarget.scrollTop <= 0;
 
         checkScrollDirection(deltaY);
-        console.log(scrollTarget);
 
         if (atFooter) {
             handleFooterScroll(deltaY);
