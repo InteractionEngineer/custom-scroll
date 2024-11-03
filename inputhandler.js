@@ -69,14 +69,6 @@ function initScrollhandler() {
     // handle a link that contains an anchor where the site scrolls to after the content is loaded
     if (window.location.hash) setScrollTargetFromHash(window.location.hash);
 
-    // some elements load after contentareas (where this skript is at)
-    setTimeout(() => {
-        const navDots = document.getElementById('navigation-dots').getElementsByTagName('a');
-        for (const dot of navDots) {
-            dot.addEventListener('click', (e) => setScrollTargetFromHash(e.target.hash), false);
-        }
-    }, 2000);
-
     setScrollVariables();
     scrollhandler();
 }
@@ -250,6 +242,15 @@ function scrollhandler() {
         console.error('No matching anchor found in URL.');
         currentTargetIndex = 0;
     }
+
+    // some elements load after contentareas (where this skript is at)
+    // TODO: change to resizeObserver that listenes to navdots height != 0
+    setTimeout(() => {
+        const navDots = document.getElementById('navigation-dots').getElementsByTagName('a');
+        for (const dot of navDots) {
+            dot.addEventListener('click', (e) => setScrollTargetFromHash(e.target.hash), false);
+        }
+    }, 2000);
 
     for (const link of menuLinks) {
         link.addEventListener('click', (e) => setScrollTargetFromHash(e.target.hash), false);
