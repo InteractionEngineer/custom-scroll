@@ -36,7 +36,6 @@ let isAnimating;
 let atFooter;
 let currScrollDir;
 let prevScrollDir;
-let scrollReverseDelta;
 
 function initScrollhandler() {
     // DOM Elements
@@ -64,7 +63,6 @@ function initScrollhandler() {
     atFooter = false;
     currScrollDir = scrollDir.UP;
     prevScrollDir = scrollDir.UP;
-    scrollReverseDelta = 0;
 
     // handle a link that contains an anchor where the site scrolls to after the content is loaded
     if (window.location.hash) setScrollTargetFromHash(window.location.hash);
@@ -101,12 +99,6 @@ function scrollhandler() {
         prevScrollDir = currScrollDir;
         if (deltaY < 0) currScrollDir = scrollDir.UP;
         else currScrollDir = scrollDir.DOWN;
-
-        if (prevScrollDir != currScrollDir)
-            scrollReverseDelta++; //TODO: trifft nur ein mal zu!
-        else if (scrollReverseDelta < 10 && scrollReverseDelta > 0)
-            scrollReverseDelta--; // TODO: random value, might need to be adjusted
-        else scrollReverseDelta = 0;
     }
 
     function updateScrollPosition(deltaY) {
@@ -126,10 +118,10 @@ function scrollhandler() {
             (atBottom && currScrollDir == scrollDir.DOWN) ||
             (atTop && currScrollDir == scrollDir.UP)
         ) {
-            handleBoundryScroll(deltaY); // scroll to next content area, also used on mobile
+            handleBoundryScroll(deltaY); // scroll to next content area
         } else {
-            scrollTarget.scrollTop += deltaY; // scroll inside current content area - on mobile this device controls this
-            accumulatedDelta = 0;
+            if (accumulatedDelta != 0) animateScrollToTarget(200); // return to current content area
+            scrollTarget.scrollTop += deltaY; // scroll inside current content area
         }
     }
 
