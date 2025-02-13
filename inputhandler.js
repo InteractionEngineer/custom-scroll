@@ -64,9 +64,6 @@ function initScrollhandler() {
     currScrollDir = scrollDir.UP;
     prevScrollDir = scrollDir.UP;
 
-    // handle a link that contains an anchor where the site scrolls to after the content is loaded
-    if (window.location.hash) setScrollTargetFromHash(window.location.hash);
-
     setScrollVariables();
     scrollhandler();
 }
@@ -259,4 +256,7 @@ function scrollhandler() {
 
     // initialisation
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
+
+    // handle a link that contains an anchor where the site scrolls to after the content is loaded
+    if (window.location.hash) setScrollTargetFromHash(window.location.hash);
 }
