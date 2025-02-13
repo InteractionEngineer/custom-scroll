@@ -218,13 +218,66 @@ function scrollhandler() {
         animateCustom2();
     }
 
-    function setScrollTargetFromHash(hash) {
+    async function animateContentAreasInDirection(startIndex, targetIndex) {
+        const direction = targetIndex > startIndex ? scrollDir.DOWN : scrollDir.UP; // different (approach) from scroll direction of wheel event
+        const start = Math.min(startIndex, targetIndex);
+        const end = Math.max(startIndex, targetIndex);
+
+        isAnimating = true;
+
+        const animationDuration = 400; // TODO: (not urgent) Make this dependent on the distance to scroll
+
+        async function animateAreaScroll(area, targetScroll) {
+            return new Promise(resolve => {
+                const startScroll = area.scrollTop;
+                const change = targetScroll - startScroll;
+                let currentTime = 0;
+                const increment = 15;
+
+                function doAreaScrollAnimation() {
+                    currentTime += increment;
+                    const val = Math.easeInOutQuad(
+                        currentTime,
+                        startScroll,
+                        change,
+                        animationDuration
+                    );
+
+                    area.scrollTop = val;
+
+                    if (currentTime < animationDuration) requestAnimationFrame(doAreaScrollAnimation);
+                    else {
+                        area.scrollTop = targetScroll;
+                        resolve();
+                    }
+                }
+
+                doAreaScrollAnimation();
+            });
+        }
+
+        for (let i = start; i <= end; i++) {
+            const area = contentAreas[i];
+            const targetScroll = direction === scrollDir.DOWN
+                ? (i === targetIndex ? 0 : area.scrollHeight - area.clientHeight)
+                : (i === targetIndex ? area.scrollHeight - area.clientHeight : 0);
+
+            await animateAreaScroll(area, targetScroll);
+        }
+
+        isAnimating = false;
+    }
+
+    async function setScrollTargetFromHash(hash) {
         for (const contentArea of contentAreas) {
             if (contentArea.id === hash.substring(1)) {
-                currentTargetIndex = Array.from(contentAreas).indexOf(contentArea);
+                const targetIndex = Array.from(contentAreas).indexOf(contentArea);
+
+                await animateContentAreasInDirection(currentTargetIndex, targetIndex);
+
+                currentTargetIndex = targetIndex;
                 scrollTarget = contentArea;
                 if (atFooter) fixedContent.style.top = `${topMargin}px`;
-                // TODO: (nice to have - NO priority) scroll all content of areas above to their end, and all content of areas below to their start
                 return;
             }
         }
