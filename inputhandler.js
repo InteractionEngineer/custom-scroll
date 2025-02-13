@@ -252,6 +252,11 @@ function scrollhandler() {
         button.addEventListener('click', (e) => setScrollTargetFromHash(e.target.hash), false);
     }
 
+    // listen for tooltip link clicks, (optional) custom event has to be dispatched at source
+    window.addEventListener('::TOOLTIP_LINK_CLICKED::', (event) => {
+        setScrollTargetFromHash(event.detail.hash);
+    });
+
     // initialisation
     window.addEventListener('wheel', handleWheelEvent, { passive: false });
 }
