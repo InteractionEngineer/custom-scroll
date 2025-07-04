@@ -218,7 +218,7 @@ function scrollhandler() {
         animateCustom2();
     }
 
-    async function animateContentAreasInDirection(startIndex, targetIndex) {
+    async function animateContentAreasInDirection(startIndex, targetIndex, isProgrammaticScroll = false) {
         const direction = targetIndex > startIndex ? scrollDir.DOWN : scrollDir.UP; // different (approach) from scroll direction of wheel event
         const start = Math.min(startIndex, targetIndex);
         const end = Math.max(startIndex, targetIndex);
@@ -258,9 +258,16 @@ function scrollhandler() {
 
         for (let i = start; i <= end; i++) {
             const area = contentAreas[i];
-            const targetScroll = direction === scrollDir.DOWN
-                ? (i === targetIndex ? 0 : area.scrollHeight - area.clientHeight)
-                : (i === targetIndex ? area.scrollHeight - area.clientHeight : 0);
+            let targetScroll;
+            
+            // If the scroll is programmatic and the direction is UP, we always scroll to the top of the target area.
+            if (isProgrammaticScroll && direction === scrollDir.UP && i === targetIndex) {
+                targetScroll = 0;
+            } else {
+                targetScroll = direction === scrollDir.DOWN
+                    ? (i === targetIndex ? 0 : area.scrollHeight - area.clientHeight)
+                    : (i === targetIndex ? area.scrollHeight - area.clientHeight : 0);
+            }
 
             await animateAreaScroll(area, targetScroll);
         }
@@ -273,7 +280,7 @@ function scrollhandler() {
             if (contentArea.id === hash.substring(1)) {
                 const targetIndex = Array.from(contentAreas).indexOf(contentArea);
 
-                await animateContentAreasInDirection(currentTargetIndex, targetIndex);
+                await animateContentAreasInDirection(currentTargetIndex, targetIndex, true);
 
                 currentTargetIndex = targetIndex;
                 scrollTarget = contentArea;
@@ -302,8 +309,8 @@ function scrollhandler() {
         button.addEventListener('click', (e) => setScrollTargetFromHash(e.target.hash), false);
     }
 
-    // listen for tooltip link clicks, (optional) custom event has to be dispatched at source
-    window.addEventListener('::TOOLTIP_LINK_CLICKED::', (event) => {
+    // If an external source want's to control the scroll, it needs to inform this script with this custom event.
+    window.addEventListener('::EXTERNAL_SCROLL_REQUEST::', (event) => {
         setScrollTargetFromHash(event.detail.hash);
     });
 
