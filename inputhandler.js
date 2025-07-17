@@ -85,6 +85,8 @@ function setScrollVariables() {
 }
 
 function scrollhandler() {
+    // TODO: add support for keyboard navigation (e.g. arrow keys, page up/down)
+
     function handleWheelEvent(e) {
         const deltaY = e.deltaY;
         e.preventDefault();
